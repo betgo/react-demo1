@@ -2,23 +2,79 @@ const Koa = require('koa');
 const next = require('next')
 const Router = require('koa-router')
 
+const KoaBody = require('koa-body')
+const session = require('koa-session')
+const Redis = require('ioredis')
+const RedisSessionStore = require('./server/redisSession')
+
+const auth = require('./server/auth')
+const Api = require('./server/api')
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({dev})
+const handle = app.getRequestHandler()
 
-const server = new Koa();
-const router = new Router()
+const redis  = new Redis(6379,'192.168.1.5')
 
-router.get('/test',(ctx,next)=>{
-      ctx.body = '<span>KOA </span>'
-})
+app.prepare().then(()=>{
+  const server = new Koa();
+  const router = new Router()
 
-server.use(async (ctx,next)=>{
+  server.keys = ['Github app']
 
-  await next()
-})
-server.use(router.routes())
+  server.use(KoaBody())
+
+  const SESSION_CONFIG = {
+    key:'jid',
+    store:new RedisSessionStore(redis)
+  }
 
 
-server.listen(3000,()=>{
+  server.use(session(SESSION_CONFIG,server))
+  auth(server)
+  Api(server)
+
+  router.get('/a/:id',async ctx=>{
+    const id = ctx.params.id
+    await handle(ctx.req,ctx.res,{
+      pathname:'/a',
+      query:{id},
+    })
+    ctx.respond = false
+  })
+
+  router.get('/api/user/info',async ctx =>{
+    const user = ctx.session.userInfo
+    if(!user){
+      ctx.status = 401
+      ctx.body = 'Need login'
+    }
+    else{
+      ctx.body = user
+      ctx.set('Content-Type','application/json')
+    }
+  })
+
+  server.use(router.routes())
+
+
+  server.use(async (ctx, next) => {
+    // ctx.cookies.set('id', 'userid:xxxxx')
+    ctx.req.session = ctx.session
+
+    await handle(ctx.req, ctx.res)
+    ctx.respond = false
+  })
+  server.use(async (ctx,next)=>{
+    ctx.res.statusCode = 200
+    await next()
+  })
+
+  server.listen(3000,()=>{
     console.log('3000启用')
 })
+  
+})
+
+
+
+

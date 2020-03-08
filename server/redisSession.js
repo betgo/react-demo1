@@ -7,7 +7,7 @@ class RedisSessionStore{
     }
 
     async get(sid){
-        console.log("get redis:",sid)
+       // console.log("get redis:",sid)
         const id = getRedisSessionId(sid)
         const data = await this.client.get(id)
         if(!data){
@@ -42,9 +42,10 @@ class RedisSessionStore{
         }
     }
 
-    async destory(sid){
+    async destroy(sid){
         console.log("del redis:",sid)
         const id = getRedisSessionId(sid)
         await this.client.del(id)
     }
 }
+module.exports = RedisSessionStore
