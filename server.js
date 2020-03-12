@@ -13,7 +13,7 @@ const dev = process.env.NODE_ENV !== 'production'
 const app = next({dev})
 const handle = app.getRequestHandler()
 
-const redis  = new Redis(6379,'192.168.1.5')
+const redis  = new Redis(6379,'192.168.1.111')
 
 app.prepare().then(()=>{
   const server = new Koa();
@@ -60,18 +60,27 @@ app.prepare().then(()=>{
   server.use(async (ctx, next) => {
     // ctx.cookies.set('id', 'userid:xxxxx')
     ctx.req.session = ctx.session
-
     await handle(ctx.req, ctx.res)
     ctx.respond = false
   })
+
   server.use(async (ctx,next)=>{
+    console.log(2)
+    console.log(ctx.req.url,"---time",new Date().toUTCString);
+     await next()
+    console.log(ctx.res.statusCode,"-----time",new Date().toUTCString)
+    
+  })
+  server.use(async (ctx,next)=>{
+    console.log(3)
     ctx.res.statusCode = 200
     await next()
   })
 
   server.listen(3000,()=>{
     console.log('3000启用')
-})
+}
+)
   
 })
 

@@ -4,7 +4,7 @@ const style = {
     width: '100%' ,
     maxWidth:1200 ,
     marginLeft:'auto',
-    marginRight:'autp',
+    marginRight:'auto',
     paddingLeft:20,
     paddingRight:20,
 

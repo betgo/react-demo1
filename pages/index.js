@@ -35,7 +35,7 @@ function Index({userRepos,userStaredRepos,user,router}){
       const timeout = setTimeout(()=>{
         cachedUserRepos = null
         cachedUserStaredRepos =null
-      },1000*10)
+      },10000*10)
     }
   },[userRepos,userStaredRepos])
   
@@ -160,14 +160,13 @@ Index.getInitialProps = async ({ctx,reduxStore})=>{
   ctx.req,
   ctx.res
   )
-
   const userStaredRepos = await api.request({
     url:'/user/starred',
   },
     ctx.req,
     ctx.res
   )
-
+  
   return{
     isLogin:true,
     userRepos:userRepos.data,

@@ -6,6 +6,7 @@ const { client_id,ClientSecret,request_token_url} = config.github
 
 module.exports = server =>{
     server.use(async(ctx,next)=>{
+
         if(ctx.path === '/auth')
         {
 
@@ -15,6 +16,7 @@ module.exports = server =>{
                 ctx.body = 'code not exist'
                 return 
             }
+            console.log('time:',new Date().toISOString())
             const result = await axios({
                 method:'POST',
                 url:request_token_url,
@@ -27,6 +29,7 @@ module.exports = server =>{
                     Accept:'application/json',
                 }
             })
+            console.log('time:',new Date().toISOString())
             console.log(result.status,result.data)
             if(result.status ===200&& (result.data && !result.data.error))
             {
@@ -43,7 +46,8 @@ module.exports = server =>{
                 })
                 
                 ctx.session.userInfo = userInfoResp.data
-             
+                console.log("ctx.session",ctx.session);
+                
                 ctx.redirect((ctx.session && ctx.session.urlBeforeOAuth)|| '/')
                 ctx.session.urlBeforeOAuth = ''
             }
@@ -57,6 +61,7 @@ module.exports = server =>{
         }
     )
     server.use(async(ctx,next)=>{
+      
         const path = ctx.path
         const method = ctx.method
         if(path ==='/logout' && method ==='POST')
@@ -70,6 +75,7 @@ module.exports = server =>{
     })
 
     server.use(async(ctx,next)=>{
+       
         const path = ctx.path
         const method = ctx.method
 

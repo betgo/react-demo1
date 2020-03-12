@@ -7,15 +7,16 @@ const github_base_url = 'https://api.github.com'
 
 module.exports = server => {
     server.use(async (ctx, next) => {
+    
         const path = ctx.path
         const method = ctx.method
      
         if (path.startsWith('/github/')) {
 
             console.log('path',path)
-            console.log(ctx.request.body);
-            const session = ctx.seesion
-            const githubAuth = session && seesion.githubAuth
+           
+            const session = ctx.session
+            const githubAuth = session && session.githubAuth
             const headers = {}
 
             if (githubAuth.access_token) {
